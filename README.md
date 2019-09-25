@@ -1,5 +1,35 @@
 # Public Transit Status with Apache Kafka
 
+
+
+# Second Submssion Note
+
+Hi Reviewer,
+
+Thanks for taking your time to review the project. I just have a point to make.
+
+From my last submission, the first rubric on kafka connect section was marked as `required` but I think it was actually passing. The reviewer wrote `Unable to fetch data for the 230 stations. Kindly recheck your code.` I acknowledge the fact that online workspace could misbehave at times so the reviewer may not have seen the result. I actually had the 230 stations produced. Below is a screenshot of the result when I run `kafka-console-consumer --bootstrap-server localhost:9092 --topic "org.chicago.cta.stations" --from-beginning`.
+
+
+![stations results](screenshots/connector_work.png)
+
+
+Also to endorse that the stations are actually produced, the `faust_stream.py` makes use of this topic to produce a different topic called `org.chicago.cta.stations.table.v1`. Below is a screenshot of stream from org.chicago.cta.stations.table.v1 topic:
+
+![stations results](screenshots/stations_table.png)
+
+
+
+
+Thanks for the review.
+
+#################################################################################################################################
+
+
+
+
+
+
 In this project, you will construct a streaming event pipeline around Apache Kafka and its ecosystem. Using public data from the [Chicago Transit Authority](https://www.transitchicago.com/data/) we will construct an event pipeline around Kafka that allows us to simulate and display the status of train lines in real time.
 
 When the project is complete, you will be able to monitor a website to watch trains move from station to station.
