@@ -40,11 +40,7 @@ class Weather(Producer):
         # replicas
         #
         #
-#         super().__init__(
-#             "weather", # TODO: Come up with a better topic name
-#             key_schema=Weather.key_schema,
-#             value_schema=Weather.value_schema,
-#         )
+
 
         super().__init__(
             f"org.chicago.cta.weather.v1", # TODO: Come up with a better topic name
@@ -64,14 +60,12 @@ class Weather(Producer):
         if Weather.key_schema is None:
             with open(f"{Path(__file__).parents[0]}/schemas/weather_key.json") as f:
                 Weather.key_schema = json.load(f)
-#         print( Weather.key_schema["fields"])
         #
         # TODO: Define this value schema in `schemas/weather_value.json
         #
         if Weather.value_schema is None:
             with open(f"{Path(__file__).parents[0]}/schemas/weather_value.json") as f:
                 Weather.value_schema = json.load(f)
-#         print( Weather.value_schema["fields"][0])
     def _set_weather(self, month):
         """Returns the current weather"""
         mode = 0.0
@@ -91,33 +85,6 @@ class Weather(Producer):
         # specify the Avro schemas and verify that you are using the correct Content-Type header.
         #
         #
-#         logger.info("weather kafka proxy integration incomplete - skipping")
-        #resp = requests.post(
-        #    #
-        #    #
-        #    # TODO: What URL should be POSTed to?
-        #    #
-        #    #
-        #    f"{Weather.rest_proxy_url}/TODO",
-        #    #
-        #    #
-        #    # TODO: What Headers need to bet set?
-        #    #
-        #    #
-        #    headers={"Content-Type": "TODO"},
-        #    data=json.dumps(
-        #        {
-        #            #
-        #            #
-        #            # TODO: Provide key schema, value schema, and records
-        #            #
-        #            #
-        #        }
-        #    ),
-        #)
-        #resp.raise_for_status()
-        
-        now = datetime.now()
         
 #         resp = requests.post(
 #            #
@@ -144,27 +111,47 @@ class Weather(Producer):
 #                }
 #            ),
 #         )
-        
+        print(f"{Weather.rest_proxy_url}/topics/{self.topic_name}")
+#         resp = requests.post(
+#            #
+#            #
+#            # TODO: What URL should be POSTed to?
+#            #
+#            #
+#            f"{Weather.rest_proxy_url}/topics/{self.topic_name}",
+#            #
+#            #
+#            # TODO: What Headers need to bet set?
+#            #
+#            #
+#            headers={"Content-Type": "application/vnd.kafka.json.v2+json"},
+#            data=json.dumps(
+#                {
+#                    "records": [
+#                         {"value": { "temperature": self.temp, "status": self.status.name } }
+#                     ]
+#                }
+#            ),
+#         )
+
         resp = requests.post(
-           #
-           #
-           # TODO: What URL should be POSTed to?
-           #
-           #
-           f"{Weather.rest_proxy_url}/topics/{self.topic_name}",
-           #
-           #
-           # TODO: What Headers need to bet set?
-           #
-           #
-           headers={"Content-Type": "application/vnd.kafka.json.v2+json"},
-           data=json.dumps(
-               {
-                   "records": [
-                        {"value": { "temperature": self.temp, "status": self.status.name } }
-                    ]
-               }
-           ),
+            f"{Weather.rest_proxy_url}/topics/{self.topic_name}",
+            headers={"Content-Type": "application/vnd.kafka.avro.v2+json"},
+            data=json.dumps(
+                {
+                    "key_schema": json.dumps(Weather.key_schema),
+                    "value_schema": json.dumps(Weather.value_schema),
+                    "records": [
+                        {
+                            "key": {"timestamp": self.time_millis()},
+                            "value": {
+                                "temperature": self.temp,
+                                "status": self.status.name,
+                            },
+                        }
+                    ],
+                }
+            ),
         )
     
     

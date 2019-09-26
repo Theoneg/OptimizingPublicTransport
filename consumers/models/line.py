@@ -28,10 +28,12 @@ class Line:
         if value["line"] != self.color:
             return
         self.stations[value["station_id"]] = Station.from_message(value)
+#         print(self.stations[value["station_id"]].station_name)
 
     def _handle_arrival(self, message):
         """Updates train locations"""
         value = message.value()
+#         print("message_value_2", value)
         prev_station_id = value.get("prev_station_id")
         prev_dir = value.get("prev_direction")
         if prev_dir is not None and prev_station_id is not None:
@@ -39,8 +41,10 @@ class Line:
             if prev_station is not None:
                 prev_station.handle_departure(prev_dir)
             else:
+#                 print("unable to handle previous station due to missing station")
                 logger.debug("unable to handle previous station due to missing station")
         else:
+#             print("unable to handle previous station due to missing previous info")
             logger.debug(
                 "unable to handle previous station due to missing previous info"
             )
@@ -57,16 +61,22 @@ class Line:
     def process_message(self, message):
         """Given a kafka message, extract data"""
         # TODO: Based on the message topic, call the appropriate handler.
-        if True: # Set the conditional correctly to the stations Faust Table
+#         print("topic", message.topic())
+#         print("value", type( message.topic() ) )
+#         value = message.value()
+        if message.topic() == "org.chicago.cta.stations.table.v1": # Set the conditional correctly to the stations Faust Table
             try:
                 value = json.loads(message.value())
                 self._handle_station(value)
             except Exception as e:
                 logger.fatal("bad station? %s, %s", value, e)
-        elif True: # Set the conditional to the arrival topic
+        elif "arrivals" in message.topic() : # Set the conditional to the arrival topic
+            print("topic", message.topic())
+            print("message_value_1", message.value())
             self._handle_arrival(message)
-        elif True: # Set the conditional to the KSQL Turnstile Summary Topic
+        elif message.topic() == "TURNSTILE_SUMMARY": # Set the conditional to the KSQL Turnstile Summary Topic
             json_data = json.loads(message.value())
+#             print("station_json", json_data)
             station_id = json_data.get("STATION_ID")
             station = self.stations.get(station_id)
             if station is None:
@@ -75,5 +85,5 @@ class Line:
             station.process_message(json_data)
         else:
             logger.debug(
-                "unable to find handler for message from topic %s", message.topic
+                "unable to find handler for message from topic %s", message.topic()
             )
