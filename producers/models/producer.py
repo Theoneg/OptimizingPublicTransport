@@ -31,22 +31,11 @@ class Producer:
         self.num_partitions = num_partitions
         self.num_replicas = num_replicas
 
-        #
-        #
-        # TODO: Configure the broker properties below. Make sure to reference the project README
-        # and use the Host URL for Kafka and Schema Registry!
-        #
-        #
-#         self.broker_properties = {
-#             # TODO
-#             # TODO
-#             # TODO
-#         }
+
         
         self.broker_properties = {
-            "broker.id": 0,
-            "log.dirs": "/tmp/kafka-logs",
-            "zookeeper.connect": "localhost:2181"
+            "schema.registry.url": "http://localhost:8081",
+            "bootstrap.servers":"PLAINTEXT://localhost:9092"
         }
 
         # If the topic does not already exist, try to create it
@@ -54,15 +43,8 @@ class Producer:
             self.create_topic()
             Producer.existing_topics.add(self.topic_name)
 
-        # TODO: Configure the AvroProducer
-        # self.producer = AvroProducer(
-        # )
         
-        self.producer = AvroProducer({'bootstrap.servers':'PLAINTEXT://localhost:9092,\
-                                      PLAINTEXT://localhost:9093,PLAINTEXT://localhost:9094', 
-                                      'schema.registry.url':'http://localhost:8081'},
-        default_key_schema=self.key_schema, default_value_schema=self.value_schema
-        )
+        self.producer = AvroProducer(self.broker_properties, default_key_schema=self.key_schema, default_value_schema=self.value_schema )
 
     def create_topic(self):
         """Creates the producer topic if it does not already exist"""
@@ -73,11 +55,11 @@ class Producer:
         #
         #
         
-        adminClient = AdminClient({'bootstrap.servers': 'PLAINTEXT://localhost:9092,\
-                                      PLAINTEXT://localhost:9093,PLAINTEXT://localhost:9094'})
+        adminClient = AdminClient({"bootstrap.servers": self.broker_properties["bootstrap.servers"]})
+        
         topic_metadata = adminClient.list_topics()
         
-        if topic_metadata.topics.get(self.topic_name) is not None:
+        if topic_metadata.topics.get(self.topic_name) is None:
             
             newTopic = NewTopic(
                 topic=self.topic_name, 
@@ -105,7 +87,8 @@ class Producer:
         # TODO: Write cleanup code for the Producer here
         #
         #
-        self.producer.flush()
+        if self.producer is not None:
+            self.producer.flush()
         
 #         logger.info("producer close incomplete - skipping")
 

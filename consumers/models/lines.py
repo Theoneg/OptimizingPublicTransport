@@ -23,14 +23,6 @@ class Lines:
         """Processes a station message"""
         if "org.chicago.cta.station" in message.topic():
             value = message.value()
-#             print("topic", message.topic())
-#             print("value", message.value())
-#             if value["line"] == 0:
-#                 value["line"] = "blue"
-#             if value["line"] == 1:
-#                 value["line"] = "green"
-#             if value["line"] == 2:
-#                 value["line"] = "red"
             if message.topic() == "org.chicago.cta.stations.table.v1":
                 value = json.loads( message.value() )
 #                 print("topic", message.topic())

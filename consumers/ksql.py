@@ -16,7 +16,7 @@ KSQL_STATEMENT = """
 CREATE TABLE turnstile (
     station_id INT,
     station_name VARCHAR,
-    line INT
+    line VARCHAR
 ) WITH (
     KAFKA_TOPIC='com.udacity.turnstile',
     VALUE_FORMAT='AVRO',
